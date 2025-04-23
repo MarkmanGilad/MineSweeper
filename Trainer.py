@@ -138,8 +138,8 @@ def main (chkpt):
                 continue
             ############## Train ################
             states, actions, rewards, next_states, dones = buffer.sample(batch_size)
-            Q_values = player.get_Q_Values(states, actions)                 # DDQN
-            _, Q_hat_Values = player_hat.get_actions_Values(next_states)
+            Q_values = player.get_Q_Values(states, actions)                 
+            _, Q_hat_Values = player_hat.get_actions_Values(next_states)        # DQN
 
             loss = player.DQN.loss(Q_values, rewards, Q_hat_Values, dones)
             optim.zero_grad()
