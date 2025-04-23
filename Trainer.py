@@ -92,16 +92,13 @@ def main (chkpt):
     player_hat.DQN.eval()
     # endregion
     #################################
-
+    wins = 0
     for epoch in range(start_epoch, ephocs):
-        # if epoch == 0:
-        #     env.restart()
-        # else:
-        #     env.RestartWithSameBoard()
         env.restart()
         end_of_game = False
         state = env.state.copy()
         step = 0
+      
         while not end_of_game:
             print (step, end='\r')
             step += 1
@@ -115,7 +112,8 @@ def main (chkpt):
             ############## Sample Environement #########################
             action = player.get_action(state=env.state, epoch=epoch, train=True)
             reward, done = env.move(action=action)
-            
+            if reward == 10:
+                wins +=1
             next_state = env.state.copy()
             buffer.push(state.toTensor(), torch.tensor(action, dtype=torch.int64), torch.tensor(reward, dtype=torch.float32), 
                         next_state.toTensor(), torch.tensor(done, dtype=torch.float32))
@@ -155,12 +153,16 @@ def main (chkpt):
         #########################################
         score = env.GetScore()
         wandb.log({"loss": loss,  "score": score, "step": step })
-        print (f'epoch: {epoch} loss: {loss.item():.7f} step: {step} best_steps: {best_step} ' \
-               f'score: {score} best_score: {best_score}')
+        print (f'run: {chkpt} epoch: {epoch} loss: {loss.item():.7f} step: {step} ',
+               f'score: {score} wins {wins}')
         step = 0
         if epoch % 10 == 0:
             scores.append(score)
             losses.append(loss.item())
+
+        if (epoch+1) % 100 == 0:
+            wandb.log({"wins": wins})
+            wins = 0
 
         avg = (avg * (epoch % 10) + score) / (epoch % 10 + 1)
         if (epoch + 1) % 10 == 0:

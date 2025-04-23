@@ -36,12 +36,12 @@ class DQN_Agent:
               self.DQN.eval()
 
     def get_state_action(self, state, action):
-        state_action = state.board.copy()
+        state_action = state.board.copy() / 10
         state_action[action] = -1
         return torch.from_numpy(state_action).to(dtype=torch.float32).unsqueeze(0)
 
-    def get_state_action_from_tensor(self, state, action):
-        state_action = state.squeeze()
+    def get_state_action_from_tensor(self, state_tensor, action):
+        state_action = state_tensor.squeeze()
         state_action[action] = -1
         return state_action.unsqueeze(0)
 
@@ -51,10 +51,10 @@ class DQN_Agent:
             state_actions.append(self.get_state_action(state, action))
         return torch.stack(state_actions)
 
-    def get_all_state_actions_from_tensor (self, state, actions):
+    def get_all_state_actions_from_tensor (self, state_tensor, actions):
         state_actions = []
         for action in actions:
-            state_actions.append(self.get_state_action_from_tensor(state.clone(), action))
+            state_actions.append(self.get_state_action_from_tensor(state_tensor.clone(), action))
         return torch.stack(state_actions)
 
     def get_action (self, state = State(), epoch = 0, events= None, train = False):
